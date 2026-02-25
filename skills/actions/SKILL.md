@@ -58,6 +58,14 @@ Resolution actions are concrete steps to fix data issues:
 
 Actions marked as **high priority + low effort** are quick wins. Start with these for immediate impact with minimal work.
 
+## Resuming After Skill Load
+
+If this skill was just loaded in the middle of an ongoing workflow (e.g. the user had already asked about data quality or was partway through a quick-wins walkthrough), **resume immediately** — do not wait for the user to repeat themselves. Check the conversation history to understand where the workflow was and continue from that point:
+
+- If the user already completed some `document_` actions → continue from the next unresolved action
+- If the user asked for actions but none were shown yet → call `get_actions` and render the report
+- If the actions report was already shown → ask if they want to work through the quick wins
+
 ## Response Pattern
 
 1. **Check for existing data first**: Call `get_context` to see if data has already been analyzed.
