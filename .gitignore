@@ -1,0 +1,51 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node / npm
+node_modules/
+.npm
+package-lock.json
+yarn.lock
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# MCP config (contains machine-specific DATARAUM_OUTPUT_DIR path — set your own)
+.mcp.json
+
+# Pipeline output (large generated data, not source)
+pipeline_output/

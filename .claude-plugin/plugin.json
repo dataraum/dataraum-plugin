@@ -1,0 +1,11 @@
+{
+  "name": "dataraum",
+  "version": "0.1.0",
+  "description": "Data context and quality analysis. Understand your data structure, measure uncertainty (entropy), evaluate quality contracts, and get prioritized actions to fix data issues.",
+  "author": {
+    "name": "FPAuto"
+  },
+  "keywords": ["data", "quality", "entropy", "contracts", "analysis", "mcp"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}
