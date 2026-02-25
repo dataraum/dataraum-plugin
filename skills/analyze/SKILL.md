@@ -58,10 +58,32 @@ Then analyze at the host path: `/Users/.../Dataraum-claude/data.csv`
 
 ## How to Use
 
-This takes **several minutes** and always returns immediately. The pipeline runs in the background.
+This takes **3–7 minutes** depending on file size and number of columns. Tell the user this upfront before starting: "This will take 3–7 minutes — I'll check in every 2 minutes and show you which phase we're on."
+
+The pipeline runs in the background and always returns immediately.
 
 - **With task support**: progress updates are delivered automatically via the tasks API
-- **Without task support**: call `get_context` periodically (~2 min intervals) to check progress — it reports the current phase while running and returns the full context document when done
+- **Without task support**: call `get_context` periodically (~2 min intervals) to check progress
+
+### Phase Progress Translation
+
+When polling with `get_context`, translate the current phase into plain language for the user. Always show: "Phase X of ~18: [plain language]. Still going — next check in ~2 minutes."
+
+| Phase name | Plain language |
+|-----------|----------------|
+| `import` | Loading your data |
+| `typing` | Detecting column types |
+| `statistics` | Profiling value distributions |
+| `correlations` | Checking for correlations |
+| `relationships` | Finding relationships between tables |
+| `semantic_analysis` | Understanding business meaning of columns *(AI step — takes a moment)* |
+| `temporal` | Detecting date/time patterns |
+| `quality_rules` | Generating quality rules *(AI step)* |
+| `entropy_detection` | Measuring data uncertainty |
+| `entropy_interpretation` | Writing quality summaries *(AI step)* |
+| `context_assembly` | Assembling final results |
+
+Phases 6, 8, and 10 are AI steps and may each take 1–2 minutes on their own — mention this when the user reaches them.
 
 Call the `analyze` MCP tool with the **host path**:
 
@@ -113,13 +135,27 @@ The pipeline runs 18 phases:
 
 ## Complete Response Pattern
 
-1. **Discover host path**: Call `get_context` to get the host workspace path from the response
-2. **Translate path**: Convert the user's VM path to the corresponding host path
-3. **Handle uploads**: If the file is in `/uploads/`, copy it to the selected folder first
-4. **Call analyze**: Use the translated host path
-5. **Monitor progress**: Call `get_context` periodically (~2 min intervals) to check progress
-6. **Report results**: When complete, note any phase failures or warnings
-7. **Suggest next steps**:
-   - `get_context` to explore the schema
-   - `get_entropy` to check data quality
-   - `query` to ask questions about the data
+### Resuming After Skill Load
+
+If this skill was just loaded in the middle of an ongoing workflow (e.g. the user had already said "analyze my data" or was partway through a pipeline run), **resume immediately** — do not wait for the user to repeat themselves. Check the conversation history to understand where the workflow was and continue from that point.
+
+1. **Check for existing data first**: Call `get_context` first.
+   - If `get_context` returns schema/table information → list the tables and row counts found, then ask: "Data already analyzed — would you like to re-analyze or work with the existing results?"
+   - If `get_context` returns an error or "no sources found" → proceed to step 2
+   - **Corrupt state recovery**: If `get_context` succeeded but a later tool call (`get_actions`, `get_entropy`, etc.) fails with "pipeline output not found" or "no data in database" — tell the user: "The analysis results exist in memory but the pipeline output files are missing — this can happen if the output directory was cleared. I'll re-run the analysis to regenerate them." Then call `analyze` with the source path from the `output_directory` field in the last `get_context` response and continue from step 5.
+
+2. **Confirm the data path** with the user if it is not already clear from context (e.g. they said "analyze my data" without specifying a path).
+
+3. **Translate path**: Convert the user's VM path to the corresponding host path (see steps above).
+
+4. **Handle uploads**: If the file is in `/uploads/`, copy it to the selected folder first.
+
+5. **Call analyze**: Use the translated host path.
+
+6. **Monitor progress**: Call `get_context` periodically (~2 min intervals) to check progress.
+
+7. **Report results**: When complete, note tables found, phases completed, and any phase failures or warnings.
+
+8. **Automatically show the actions report**: Immediately call `get_actions()` and render the inline HTML actions report (follow the same HTML template defined in the actions skill — do not write a file to disk). Do not wait for the user to ask for it.
+
+9. **Close with**: "Analysis complete. Here are the data quality actions I found. Would you like to work through the quick wins together? I'll walk you through each one and ask for your input."

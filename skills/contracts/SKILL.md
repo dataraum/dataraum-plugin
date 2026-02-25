@@ -43,10 +43,17 @@ evaluate_contract(contract_name="executive_dashboard")
 
 ## Response Pattern
 
-1. If no data has been analyzed yet, call `analyze` first with the user's data path
+**Resuming after skill load:** If this skill loaded mid-conversation, resume immediately — do not wait for the user to re-prompt. Check the conversation history and continue from where things left off.
+
+**Validation context:** If this evaluation is being run after a `document_` quick-wins session (the user just worked through documentation actions), frame the result as a before/after comparison. Check the conversation history for any prior contract score. If found, show the delta explicitly in your response: "Before documentation: [score] → After: [new score]."
+
+1. **Check for existing data first**: Call `get_context` to see if data has already been analyzed.
+   - If `get_context` returns schema/table information → data exists, skip to step 3
+   - If `get_context` returns an error or "no sources found" → call `analyze` first with the user's data path, then continue
+   - **Do not call `analyze` if data already exists in the database**
 2. If unsure which contract to use, recommend `aggregation_safe` as a good default
 3. Call the `evaluate_contract` tool with the appropriate contract name
-4. Output a self-contained HTML artifact using the template below
+4. Render the result as an **inline HTML artifact directly in your response** — do NOT write an HTML file to disk. Use the template below.
 
 ### HTML Output Template
 

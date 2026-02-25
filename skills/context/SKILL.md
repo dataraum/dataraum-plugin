@@ -51,7 +51,9 @@ The context document includes:
 
 ## Response Pattern
 
-1. If no data has been analyzed yet, call `analyze` first with the user's data path
+**Resuming after skill load:** If this skill loaded mid-conversation, resume immediately — do not wait for the user to re-prompt. Check the conversation history and continue from where things left off.
+
+1. **Check for existing data**: Call `get_context` first. If it returns an error or "no sources found", call `analyze` first with the user's data path, then continue.
 2. Call the `get_context` tool
 3. Summarize the tables and their row counts
 4. Highlight key relationships

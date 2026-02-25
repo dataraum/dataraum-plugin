@@ -60,9 +60,12 @@ Actions marked as **high priority + low effort** are quick wins. Start with thes
 
 ## Response Pattern
 
-1. If no data has been analyzed yet, call `analyze` first with the user's data path
+1. **Check for existing data first**: Call `get_context` to see if data has already been analyzed.
+   - If `get_context` returns schema/table information → data exists, skip to step 2
+   - If `get_context` returns an error or "no sources found" → call `analyze` first with the user's data path, then continue
+   - **Do not call `analyze` if data already exists in the database**
 2. Call the `get_actions` tool (optionally filtered by priority or table)
-3. Output a self-contained HTML artifact using the template below
+3. Render the result as an **inline HTML artifact directly in your response** — do NOT write an HTML file to disk. Use the template below.
 
 ### HTML Output Template
 
@@ -103,23 +106,94 @@ Generate a `<!DOCTYPE html>` artifact. Use only inline CSS — no external depen
 
 2. **Quick Wins section** (`.card.quick-win`) — only if any HIGH priority + LOW effort actions exist:
    - Section heading "⚡ Quick Wins — High Priority · Low Effort"
-   - Table with columns: Action | Type | Affected Columns | Expected Impact
+   - Table with columns: Action | Effort | Column | What to do | Expected Impact
 
 3. **Priority group sections** — one `.card` per group that has actions, in order HIGH → MEDIUM → LOW. Skip empty groups entirely.
    - Heading: "🔴 HIGH Priority" / "🟡 MEDIUM Priority" / "🔵 LOW Priority"
-   - Table with columns: Action | Effort | Affected Columns | Expected Impact
+   - Table with columns: Action | Effort | Column | What to do | Expected Impact
    - Render `Effort` as a pill: LOW=`.pill-green`, MEDIUM=`.pill-yellow`, HIGH=`.pill-red`
    - Render action name as `<code>`
    - Within each group, sort by effort ascending (LOW first)
+
+**"What to do" column rules:**
+- Populate from the action's `parameters` field in the tool response
+- Translate any raw machine strings to plain language (e.g. `unit_declaration=high` → "Declare the unit for this column (e.g. %, EUR, kg)")
+- If `parameters` contains a specific instruction string, use it verbatim
+- Examples by action type:
+  - `document_unit` → "Declare the unit for `column_name` (e.g. %, EUR, kg)"
+  - `document_null_semantics` → "Declare what null values mean in `column_name`"
+  - `document_business_rule` → the rule description from parameters
+  - `transform_winsorize` → "Cap extreme values at [threshold] percentile"
+  - `investigate_*` → "Human review required: [description from parameters]"
 
 4. **Footer** (`.muted`): "Suggested remediation order: Quick Wins → HIGH + LOW effort → HIGH + MEDIUM effort → MEDIUM priority"
 
 **Example row:**
 ```html
 <tr>
-  <td><code>investigate_nulls_order_id</code></td>
+  <td><code>document_unit</code></td>
   <td><span class="pill pill-green">LOW</span></td>
-  <td><code>order_id</code></td>
-  <td>Prevents silent join failures</td>
+  <td><code>kontobewegung_steuersatz</code></td>
+  <td>Declare the unit for this column (e.g. %, EUR, kg)</td>
+  <td>Removes aggregation uncertainty for tax rate fields</td>
 </tr>
 ```
+
+## Handling `document_` Quick Wins Interactively
+
+When the user agrees to work through quick wins, guide them through each `document_` action one at a time (highest priority + lowest effort first):
+
+**For each `document_` action:**
+
+1. Present the column and the issue in plain language:
+   > **`column_name`** — needs a [unit / null meaning / business rule] declaration.
+
+2. Propose a specific value based on what you know about the column from context (name, data seen, entropy findings):
+   - `document_unit`: "I suggest declaring this as **%** (percentage) based on the column name — does that look right, or would you like to specify something else?"
+   - `document_null_semantics`: "Nulls here likely mean 'not applicable' — confirm or describe what they mean in your context."
+   - `document_business_rule`: quote the rule from the `parameters` field and ask if it's accurate.
+
+3. Wait for the user's confirmation or correction.
+
+4. Acknowledge and move on:
+   > ✅ Noted: `column_name` = [confirmed value]. Moving to next…
+
+5. After all `document_` quick wins: summarize what was captured in a short list, then automatically transition to contract validation — do not wait for the user to ask.
+
+   Say: "You've just answered [N] questions about your data. Let's see if that moved the needle — I'll run the contract evaluation now to show you your updated readiness score."
+
+   Then immediately call `evaluate_contract(contract_name="aggregation_safe")` and render the inline HTML contract report.
+
+   Frame it as a before/after: if a prior contract score appeared earlier in the conversation, say "Before: ❌ FAIL (0.12) → Let's see where we are now." If no prior score is known, say "Here's your current readiness score after the documentation work."
+
+   After showing the contract result, follow up based on the outcome:
+   - **PASS**: "✅ Your data is now aggregation-safe. Ready to run some queries? I can hand you validated SQL your team can reuse."
+   - **FAIL but score improved vs. before**: "You've made progress — score moved from [before] to [after]. The remaining gaps are [failing dimensions]. Want to tackle the next action group, or run a query now with what you have?"
+   - **No change / same score**: "The score didn't change yet — documentation annotations may need a pipeline re-run to take effect, or the remaining gaps need transform_ actions. Want to re-run the pipeline to pick up the new annotations?"
+
+**Rules:**
+- Handle one action at a time — do not present all at once
+- Always propose a value; never just ask "what should this be?"
+- Do not auto-apply any changes, write files, or run Python
+- `transform_`, `investigate_`, and `create_` actions are out of scope for now — do not silently skip them; add them to the Open Items list below
+
+## Open Items
+
+Maintain a running list of unresolved items throughout the session. Add to it from:
+- All `investigate_` actions (require human review — cannot be auto-resolved)
+- User decisions deferred with "I'll check later" or similar
+- Ambiguous values that couldn't be resolved in the `document_` workflow
+
+After completing the `document_` quick wins, always show the current Open Items list:
+
+```
+## 📋 Open Items
+
+1. **`column_name`** — [what needs investigating, from parameters field] — *open*
+2. **`other_column`** — [what the user needs to decide] — *open*
+```
+
+Then ask: "Want to note who should look into any of these, or shall I remind you next time we look at this data?"
+
+As items get resolved during conversation, update their status inline:
+`— *resolved: [what was decided]*`

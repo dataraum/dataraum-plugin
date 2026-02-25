@@ -50,9 +50,14 @@ Each column gets a weighted composite score across all dimensions. Higher scores
 
 ## Response Pattern
 
-1. If no data has been analyzed yet, call `analyze` first with the user's data path
+**Resuming after skill load:** If this skill loaded mid-conversation, resume immediately — do not wait for the user to re-prompt. Check the conversation history and continue from where things left off.
+
+1. **Check for existing data first**: Call `get_context` to see if data has already been analyzed.
+   - If `get_context` returns schema/table information → data exists, skip to step 2
+   - If `get_context` returns an error or "no sources found" → call `analyze` first with the user's data path, then continue
+   - **Do not call `analyze` if data already exists in the database**
 2. Call the `get_entropy` tool (optionally filtered to a table)
-3. Output a self-contained HTML artifact using the template below
+3. Render the result as an **inline HTML artifact directly in your response** — do NOT write an HTML file to disk. Use the template below.
 
 ### Score Thresholds
 

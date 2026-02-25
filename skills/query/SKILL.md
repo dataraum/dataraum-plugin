@@ -47,7 +47,11 @@ Pass `contract_name` when the user needs to know if the data is reliable enough 
 
 ## Response Pattern
 
-1. If no data has been analyzed yet, call `analyze` first with the user's data path
+**Resuming after skill load:** If this skill loaded mid-conversation, resume immediately — do not wait for the user to re-prompt. Check the conversation history and continue from where things left off.
+
+1. **Check for existing data first**: Call `get_context` to see if data has already been analyzed.
+   - If `get_context` returns schema/table information → data exists, proceed to step 2
+   - If `get_context` returns an error or "no sources found" → call `analyze` first with the user's data path, then continue
 2. Call the `query` tool with the user's question
 3. Present the answer clearly
 4. Show confidence level
