@@ -1,0 +1,18 @@
+{
+  "name": "dataraum",
+  "owner": {
+    "name": "Data Raum",
+    "email": "florian@dataraum.com"
+  },
+  "plugins": [
+    {
+      "name": "dataraum",
+      "source": "./",
+      "description": "Use this tool to analyze a dataset's structure and quality before performing calculations or answering user queries. It measures data entropy (semantic and structural ambiguity), evaluates deterministic quality contracts, and returns an AI-readiness score with prioritized actions to prevent hallucinations.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Data Raum"
+      }
+    }
+  ]
+}
