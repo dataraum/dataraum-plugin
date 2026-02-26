@@ -85,7 +85,19 @@ When polling with `get_context`, translate the current phase into plain language
 
 Phases 6, 8, and 10 are AI steps and may each take 1–2 minutes on their own — mention this when the user reaches them.
 
-Call the `analyze` MCP tool with the **host path**:
+### Registered Sources Mode
+
+If the user has already registered sources via `add_source`, you can run the pipeline on all registered sources at once — no path needed:
+
+```
+analyze()
+```
+
+This is the preferred mode when sources are already set up. Skip path translation entirely and call `analyze()` with no arguments.
+
+### File Path Mode
+
+To analyze a specific file or directory, call `analyze` with the **host path**:
 
 ```
 analyze(path="/Users/name/folder/data.csv")
@@ -98,7 +110,7 @@ analyze(path="/Users/name/folder/data.csv", name="my_dataset")
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `path` | string | **Required**: Host machine path to CSV/Parquet file or directory |
+| `path` | string | Optional: Host machine path to CSV/Parquet file or directory. Omit to analyze all registered sources. |
 | `name` | string | Optional: name for the data source (defaults to filename) |
 
 ### Supported Formats
@@ -144,13 +156,15 @@ If this skill was just loaded in the middle of an ongoing workflow (e.g. the use
    - If `get_context` returns an error or "no sources found" → proceed to step 2
    - **Corrupt state recovery**: If `get_context` succeeded but a later tool call (`get_actions`, `get_entropy`, etc.) fails with "pipeline output not found" or "no data in database" — tell the user: "The analysis results exist in memory but the pipeline output files are missing — this can happen if the output directory was cleared. I'll re-run the analysis to regenerate them." Then call `analyze` with the source path from the `output_directory` field in the last `get_context` response and continue from step 5.
 
-2. **Confirm the data path** with the user if it is not already clear from context (e.g. they said "analyze my data" without specifying a path).
+2. **Choose mode**: Check if the user has registered sources (visible in `get_context` or from prior `discover_sources`/`add_source` calls).
+   - **Registered sources exist and no specific file requested** → skip to step 5 and call `analyze()` with no arguments.
+   - **Specific file requested or no registered sources** → continue to step 3.
 
-3. **Translate path**: Convert the user's VM path to the corresponding host path (see steps above).
+3. **Confirm the data path** with the user if it is not already clear from context (e.g. they said "analyze my data" without specifying a path).
 
-4. **Handle uploads**: If the file is in `/uploads/`, copy it to the selected folder first.
+4. **Translate path**: Convert the user's VM path to the corresponding host path (see steps above). **Handle uploads**: If the file is in `/uploads/`, copy it to the selected folder first.
 
-5. **Call analyze**: Use the translated host path.
+5. **Call analyze**: Use the translated host path, or call `analyze()` with no arguments for registered sources mode.
 
 6. **Monitor progress**: Call `get_context` periodically (~2 min intervals) to check progress.
 

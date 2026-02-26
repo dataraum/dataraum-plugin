@@ -18,6 +18,8 @@ Just ask Claude to analyze your data — no CLI required:
 
 - "Analyze the CSV at /path/to/data.csv"
 - "Process my Parquet files in /path/to/data/"
+- "Scan for data files" (discovers files, then register and analyze)
+- "Analyze my data" (runs on all registered sources)
 
 Or run the pipeline from the command line:
 
@@ -65,6 +67,23 @@ Executes natural language queries against the data with entropy-aware confidence
 
 Returns prioritized steps to improve data quality, sorted by impact and effort.
 
+### Source Management
+
+### Discover Sources
+**Trigger:** "find data files", "scan for sources", "what data is available", "what sources do I have"
+
+Scans the workspace for data files (CSV, Parquet, JSON, XLSX) and lists existing registered sources.
+
+### Add Source
+**Trigger:** "add source", "register data", "connect database", "add my CSV", "connect to postgres"
+
+Registers a new data source — either a file path or a database connection (Postgres, MySQL, SQLite).
+
+### Remove Source
+**Trigger:** "remove source", "delete source", "unregister", "disconnect"
+
+Archives or permanently deletes a registered data source.
+
 ## MCP Tools
 
 | Tool | Description |
@@ -75,6 +94,9 @@ Returns prioritized steps to improve data quality, sorted by impact and effort.
 | `evaluate_contract` | Data quality contract evaluation |
 | `query` | Natural language query execution |
 | `get_actions` | Prioritized resolution actions |
+| `discover_sources` | Scan workspace for data files and list registered sources |
+| `add_source` | Register a file or database as a data source |
+| `remove_source` | Archive or delete a registered data source |
 
 ## Requirements
 
