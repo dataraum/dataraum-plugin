@@ -156,12 +156,21 @@ When the user agrees to work through quick wins, guide them through each `docume
 1. Present the column and the issue in plain language:
    > **`column_name`** — needs a [unit / null meaning / business rule] declaration.
 
-2. Propose a specific value based on what you know about the column from context (name, data seen, entropy findings):
-   - `document_unit`: "I suggest declaring this as **%** (percentage) based on the column name — does that look right, or would you like to specify something else?"
-   - `document_null_semantics`: "Nulls here likely mean 'not applicable' — confirm or describe what they mean in your context."
-   - `document_business_rule`: quote the rule from the `parameters` field and ask if it's accurate.
+2. **Always present choices as a numbered list** — never ask open-ended questions. Generate 3–4 options based on what you know about the column (name, data, entropy findings, source system if detected), plus an "Other" option. Format like this:
 
-3. Wait for the user's confirmation or correction.
+   > **`kontobewegung_steuersatz`** — What unit should this tax rate column declare?
+   >
+   > **A)** % (percentage, e.g. 19.0 = 19%)
+   > **B)** Decimal fraction (e.g. 0.19 = 19%)
+   > **C)** Basis points (e.g. 1900 = 19%)
+   > **D)** Other — I'll type it
+
+   Rules for generating options:
+   - `document_unit`: list the 2–3 most likely units based on column name and context, plus "Other — I'll type it" as the last option. Put your best guess first.
+   - `document_null_semantics`: list the 2–3 most likely meanings (e.g. "Not applicable", "Not yet captured", "Zero / no value"), plus "Other — I'll describe it"
+   - `document_business_rule`: list the suggested rule from `parameters` as option A, a simplified variant as B, then "Other — I'll describe it"
+
+3. Wait for the user to reply with a letter or type their own value.
 
 4. Acknowledge and move on:
    > ✅ Noted: `column_name` = [confirmed value]. Moving to next…
