@@ -156,21 +156,20 @@ When the user agrees to work through quick wins, guide them through each `docume
 1. Present the column and the issue in plain language:
    > **`column_name`** — needs a [unit / null meaning / business rule] declaration.
 
-2. **Always present choices as a numbered list** — never ask open-ended questions. Generate 3–4 options based on what you know about the column (name, data, entropy findings, source system if detected), plus an "Other" option. Format like this:
+2. **Use the `AskUserQuestion` tool** to present a native interactive multiple-choice prompt — never ask open-ended questions in plain text. Generate 3–4 options based on what you know about the column (name, data, entropy findings, source system if detected). The last option should always allow free text input.
 
-   > **`kontobewegung_steuersatz`** — What unit should this tax rate column declare?
-   >
-   > **A)** % (percentage, e.g. 19.0 = 19%)
-   > **B)** Decimal fraction (e.g. 0.19 = 19%)
-   > **C)** Basis points (e.g. 1900 = 19%)
-   > **D)** Other — I'll type it
+   Call `AskUserQuestion` with:
+   - `question`: the specific question for this column (e.g. "What unit does `kontobewegung_steuersatz` represent?")
+   - `header`: short label shown as a chip (e.g. "Unit", "Null meaning", "Business rule")
+   - `options`: 3–4 choices, each with a `label` and a `description`. Always include a final option with label "Other" and description "I'll type my own value".
+   - `multiSelect: false`
 
-   Rules for generating options:
-   - `document_unit`: list the 2–3 most likely units based on column name and context, plus "Other — I'll type it" as the last option. Put your best guess first.
-   - `document_null_semantics`: list the 2–3 most likely meanings (e.g. "Not applicable", "Not yet captured", "Zero / no value"), plus "Other — I'll describe it"
-   - `document_business_rule`: list the suggested rule from `parameters` as option A, a simplified variant as B, then "Other — I'll describe it"
+   Rules for generating options by action type:
+   - `document_unit`: list the 2–3 most likely units with examples (e.g. label "%" description "Percentage — e.g. 19.0 = 19%"). Put your best guess first.
+   - `document_null_semantics`: list likely meanings (e.g. "Not applicable", "Not yet captured", "Zero / no value")
+   - `document_business_rule`: option A = the rule from `parameters`, option B = a simplified plain-language variant
 
-3. Wait for the user to reply with a letter or type their own value.
+3. Wait for the user's selection. If they choose "Other", ask them to type their value in a follow-up message.
 
 4. Acknowledge and move on:
    > ✅ Noted: `column_name` = [confirmed value]. Moving to next…
