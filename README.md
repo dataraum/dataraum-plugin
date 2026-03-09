@@ -40,32 +40,22 @@ dataraum run /path/to/your/data --output ./pipeline_output
 ### Analyze
 **Trigger:** "analyze this data", "process my CSV", "load this file", "run the pipeline"
 
-Runs the full 18-phase analysis pipeline on CSV or Parquet data. Must be called before other tools if no data has been analyzed yet.
+Runs the full analysis pipeline on CSV or Parquet data. Must be called before other tools if no data has been analyzed yet.
 
 ### Context
 **Trigger:** "what tables", "show me the schema", "describe the data", "what data is available"
 
 Returns schema, semantic annotations, relationships, and quality indicators.
 
-### Entropy
-**Trigger:** "entropy", "uncertainty", "how reliable", "data quality dimensions"
+### Quality
+**Trigger:** "entropy", "uncertainty", "contract", "compliance", "aggregation safe", "fix quality", "what should I fix", "improve data"
 
-Returns entropy analysis showing data uncertainty across structural, semantic, value, and computational dimensions.
-
-### Contracts
-**Trigger:** "contract", "compliance", "data ready for", "aggregation safe"
-
-Evaluates data quality against named contracts (e.g., `aggregation_safe`, `executive_dashboard`).
+Unified quality analysis — entropy scores, contract evaluation, and resolution actions in a single report. Use `include` to request specific sections.
 
 ### Query
 **Trigger:** "how many", "total", "calculate", "analyze", "what is the"
 
 Executes natural language queries against the data with entropy-aware confidence levels.
-
-### Actions
-**Trigger:** "fix quality", "what should I fix", "improve data", "resolution actions"
-
-Returns prioritized steps to improve data quality, sorted by impact and effort.
 
 ### Source Management
 
@@ -79,24 +69,16 @@ Scans the workspace for data files (CSV, Parquet, JSON, XLSX) and lists existing
 
 Registers a new data source — either a file path or a database connection (Postgres, MySQL, SQLite).
 
-### Remove Source
-**Trigger:** "remove source", "delete source", "unregister", "disconnect"
-
-Archives or permanently deletes a registered data source.
-
 ## MCP Tools
 
 | Tool | Description |
 |------|-------------|
 | `analyze` | Run analysis pipeline on CSV/Parquet data |
 | `get_context` | Full data context document for AI analysis |
-| `get_entropy` | Entropy analysis by dimension |
-| `evaluate_contract` | Data quality contract evaluation |
+| `get_quality` | Unified quality report: entropy, contracts, actions |
 | `query` | Natural language query execution |
-| `get_actions` | Prioritized resolution actions |
 | `discover_sources` | Scan workspace for data files and list registered sources |
 | `add_source` | Register a file or database as a data source |
-| `remove_source` | Archive or delete a registered data source |
 
 ## Requirements
 

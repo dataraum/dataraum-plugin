@@ -22,17 +22,27 @@ The MCP server starts automatically when Claude Code or Claude Desktop loads the
 
 ## Available MCP Tools
 
-| Tool | Description | Required Parameters |
-|------|-------------|---------------------|
-| `analyze` | Run analysis pipeline on CSV/Parquet data | `path` (optional), `name` (optional) |
-| `get_context` | Full data context: schema, relationships, semantic annotations, quality | None |
-| `get_entropy` | Entropy analysis: data uncertainty by dimension | `table_name` (optional) |
-| `evaluate_contract` | Evaluate data quality against a contract | `contract_name` |
-| `query` | Natural language query against the data | `question`, `contract_name` (optional) |
-| `get_actions` | Prioritized resolution actions for data quality | `priority` (optional), `table_name` (optional) |
-| `discover_sources` | Scan workspace for data files and list registered sources | `path` (optional), `recursive` (optional) |
-| `add_source` | Register a file or database as a data source | `name`, `path` or `backend`, `tables` (optional), `credential_ref` (optional) |
-| `remove_source` | Archive or delete a registered data source | `name`, `purge_results` (optional) |
+### Core tools
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `analyze` | Run analysis pipeline on CSV/Parquet data | `path`, `name?`, `gate_mode?` |
+| `get_context` | Full data context: schema, relationships, semantic annotations, quality | — |
+| `get_quality` | Unified quality report: entropy, contract evaluation, resolution actions | `contract_name?`, `table_name?`, `priority?`, `include?` |
+| `query` | Natural language query against the data | `question`, `contract_name?` |
+
+The `include` parameter on `get_quality` accepts a list of sections: `entropy`, `contract`, `actions`. Defaults to all three.
+
+### Source management tools
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `discover_sources` | Scan workspace for data files and list registered sources | `path?`, `recursive?` |
+| `add_source` | Register a file or database as a data source | `name`, `path?`, `backend?`, `tables?`, `credential_ref?` |
+
+### Contract names
+
+`exploratory_analysis`, `data_science`, `operational_analytics`, `aggregation_safe`, `executive_dashboard`, `regulatory_reporting`
 
 ## Environment Variables
 
