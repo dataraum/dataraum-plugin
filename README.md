@@ -57,6 +57,11 @@ Unified quality analysis — entropy scores, contract evaluation, and resolution
 
 Executes natural language queries against the data with entropy-aware confidence levels.
 
+### Export
+**Trigger:** "export", "save to file", "write to CSV", "download as parquet", "materialize"
+
+Export query results or SQL output to CSV, Parquet, or JSON files with metadata sidecars carrying provenance (SQL, entropy, assumptions).
+
 ### Source Management
 
 ### Discover Sources
@@ -77,6 +82,7 @@ Registers a new data source — either a file path or a database connection (Pos
 | `get_context` | Full data context document for AI analysis |
 | `get_quality` | Unified quality report: entropy, contracts, actions |
 | `query` | Natural language query execution |
+| `export` | Export query/SQL results to CSV, Parquet, or JSON with metadata |
 | `discover_sources` | Scan workspace for data files and list registered sources |
 | `add_source` | Register a file or database as a data source |
 
